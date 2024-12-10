@@ -1,0 +1,71 @@
+version: "3.9"
+
+services:
+  # MongoDB Service
+  mongodb:
+    build:
+      context: ./
+      dockerfile: dockerfile
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - backend
+
+  # Neo4j Service
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/strongpassword
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - backend
+
+  # Node.js Service
+  nodejs:
+    build:
+      context: ./node_app
+      dockerfile: dockerfile
+    container_name: nodejs
+    ports:
+      - "3000:3000"
+    networks:
+      - backend
+
+  # Python Service
+  python:
+    image: python:3.11-slim
+    container_name: python
+    working_dir: /app
+    volumes:
+      - ./python_app:/app
+    command: python3 main.py
+    ports:
+      - "5000:5000"
+    networks:
+      - backend
+
+  # PHP Service
+  php:
+    image: php:8.2-apache
+    container_name: php
+    ports:
+      - "8080:80"
+    volumes:
+      - ./php_app:/var/www/html
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  mongodb_data:
+  neo4j_data:
+  neo4j_logs:
